@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -20,28 +19,6 @@ type config struct {
 type application struct {
 	config config
 	logger *log.Logger
-}
-
-func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
-	// Create a map to hold our response data
-	data := map[string]string{
-		"status":      "available",
-		"environment": app.config.env,
-		"version":     version,
-	}
-
-	// Convert the data to JSON
-	js, err := json.Marshal(data)
-	if err != nil {
-		app.logger.Println(err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	// Set the content type header to application/json
-	w.Header().Set("Content-Type", "application/json")
-
-	w.Write(js)
 }
 
 func main() {
