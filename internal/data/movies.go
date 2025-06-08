@@ -7,7 +7,7 @@ type Movie struct {
 	CreatedAt time.Time
 	Title     string
 	Year      int32
-	Runtime   int32
+	Runtime   Runtime
 	Genres    []string
 	Version   int32
 }
