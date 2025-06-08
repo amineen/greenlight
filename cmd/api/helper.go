@@ -28,7 +28,7 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data any, h
 		"data":    data,
 	}
 
-	js, err := json.Marshal(envelope)
+	js, err := json.MarshalIndent(envelope, "", "\t")
 
 	if err != nil {
 		return err

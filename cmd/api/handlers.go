@@ -46,6 +46,7 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 		CreatedAt: time.Now(),
 		Title:     "Casablanca",
 		Runtime:   102,
+		Year:      2025,
 		Genres: []string{
 			"drama",
 			"romance",
