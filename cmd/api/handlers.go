@@ -3,6 +3,9 @@ package main
 import (
 	"errors"
 	"net/http"
+	"time"
+
+	"github.com/amineen/greenlight/internal/data"
 )
 
 func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
@@ -37,11 +40,20 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 		app.errorJSON(w, errors.New("movie not found"), http.StatusNotFound)
 		return
 	}
-	response := map[string]int64{
-		"id": id,
+
+	movie := data.Movie{
+		ID:        id,
+		CreatedAt: time.Now(),
+		Title:     "Casablanca",
+		Runtime:   102,
+		Genres: []string{
+			"drama",
+			"romance",
+			"war"},
+		Version: 1,
 	}
 
-	err = app.writeJSON(w, http.StatusOK, response, nil)
+	err = app.writeJSON(w, http.StatusOK, movie, nil)
 	if err != nil {
 		app.errorJSON(w, err, http.StatusInternalServerError)
 		return
