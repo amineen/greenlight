@@ -3,6 +3,9 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,4 +45,29 @@ func (app *application) createMovie(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+}
+
+func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
+	idstr := params.ByName("id")
+
+	id, err := strconv.ParseInt(idstr, 10, 64)
+
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+	response := map[string]int64{
+		"id": id,
+	}
+	js, err := json.Marshal((response))
+
+	if err != nil {
+		app.logger.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+
 }
