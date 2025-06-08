@@ -22,7 +22,13 @@ func (app *application) readIDParams(r *http.Request) (int64, error) {
 }
 
 func (app *application) writeJSON(w http.ResponseWriter, status int, data any, headers http.Header) error {
-	js, err := json.Marshal(data)
+	// Create envelope for consistent response format
+	envelope := map[string]any{
+		"success": true,
+		"data":    data,
+	}
+
+	js, err := json.Marshal(envelope)
 
 	if err != nil {
 		return err
@@ -39,24 +45,28 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data any, h
 
 // errorJSON sends a JSON-formatted error response with the provided error message and status code
 func (app *application) errorJSON(w http.ResponseWriter, err error, statusCode int) {
-	type errorResponse struct {
-		Success bool   `json:"success"`
-		Message string `json:"message"`
+	errorMessage := "The server encountered a problem and could not process your request"
+	if err != nil {
+		errorMessage = err.Error()
 	}
 
-	response := errorResponse{
-		Success: false,
-		Message: err.Error(),
+	// Create response envelope with success=false and null data
+	envelope := map[string]any{
+		"success": false,
+		"data":    nil,
+		"msg":     errorMessage,
 	}
 
-	// If the error is nil, use a generic message
-	if err == nil {
-		response.Message = "The server encountered a problem and could not process your request"
-	}
-
-	err = app.writeJSON(w, statusCode, response, nil)
+	js, err := json.Marshal(envelope)
 	if err != nil {
 		app.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
+
+	js = append(js, '\n')
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	w.Write(js)
 }
