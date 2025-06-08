@@ -36,3 +36,27 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data interf
 	w.Write(js)
 	return nil
 }
+
+// errorJSON sends a JSON-formatted error response with the provided error message and status code
+func (app *application) errorJSON(w http.ResponseWriter, err error, statusCode int) {
+	type errorResponse struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}
+
+	response := errorResponse{
+		Success: false,
+		Message: err.Error(),
+	}
+
+	// If the error is nil, use a generic message
+	if err == nil {
+		response.Message = "The server encountered a problem and could not process your request"
+	}
+
+	err = app.writeJSON(w, statusCode, response, nil)
+	if err != nil {
+		app.logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}

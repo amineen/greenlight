@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	"errors"
 	"net/http"
 )
 
@@ -13,9 +13,7 @@ func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Reques
 	}
 	err := app.writeJSON(w, http.StatusOK, data, nil)
 	if err != nil {
-		app.logger.Println(err)
-		http.Error(w,
-			"The server encountered a problem and could not process your request", http.StatusInternalServerError)
+		app.errorJSON(w, err, http.StatusInternalServerError)
 	}
 }
 
@@ -24,16 +22,11 @@ func (app *application) createMovie(w http.ResponseWriter, r *http.Request) {
 		"msg": "Created a new movie",
 	}
 
-	js, err := json.Marshal((response))
-
+	err := app.writeJSON(w, http.StatusCreated, response, nil)
 	if err != nil {
-		app.logger.Println(err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.errorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
 }
 
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
@@ -41,20 +34,17 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 	id, err := app.readIDParams(r)
 
 	if err != nil || id < 1 {
-		http.NotFound(w, r)
+		app.errorJSON(w, errors.New("movie not found"), http.StatusNotFound)
 		return
 	}
 	response := map[string]int64{
 		"id": id,
 	}
-	js, err := json.Marshal(response)
 
+	err = app.writeJSON(w, http.StatusOK, response, nil)
 	if err != nil {
-		app.logger.Println(err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.errorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
 
 }
