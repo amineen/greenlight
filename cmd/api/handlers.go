@@ -20,6 +20,19 @@ func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
+	data := map[string]string{
+		"author":      "Aaron Mineen",
+		"environment": app.config.env,
+		"version":     version,
+		"github":      "https://github.com/amineen",
+	}
+	err := app.writeJSON(w, http.StatusOK, data, nil)
+	if err != nil {
+		app.errorJSON(w, err, http.StatusInternalServerError)
+	}
+}
+
 func (app *application) createMovie(w http.ResponseWriter, r *http.Request) {
 	response := map[string]string{
 		"msg": "Created a new movie",
