@@ -2,29 +2,20 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
 func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a map to hold our response data
-	data := map[string]string{
-		"status":      "available",
-		"environment": app.config.env,
-		"version":     version,
-	}
+	data := `{"status":"available", "environment":%q, "version":%q}`
 
-	// Convert the data to JSON
-	js, err := json.Marshal(data)
-	if err != nil {
-		app.logger.Println(err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
+	js := fmt.Sprintf(data, app.config.env, version)
 
 	// Set the content type header to application/json
 	w.Header().Set("Content-Type", "application/json")
 
-	w.Write(js)
+	w.Write([]byte(js))
 }
 
 func (app *application) createMovie(w http.ResponseWriter, r *http.Request) {
