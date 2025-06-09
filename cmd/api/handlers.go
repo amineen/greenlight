@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -34,15 +36,22 @@ func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) createMovie(w http.ResponseWriter, r *http.Request) {
-	response := map[string]string{
-		"msg": "Created a new movie",
+
+	var input struct {
+		Title   string   `json:"title"`
+		Year    int32    `json:"year"`
+		Runtime int32    `json:"runtime"`
+		Genres  []string `json:"genres"`
 	}
 
-	err := app.writeJSON(w, http.StatusCreated, response, nil)
+	err := json.NewDecoder(r.Body).Decode(&input)
+
 	if err != nil {
-		app.errorJSON(w, err, http.StatusInternalServerError)
+		app.errorJSON(w, err, http.StatusBadRequest)
 		return
 	}
+
+	fmt.Fprintf(w, "%+v\n", input)
 }
 
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
